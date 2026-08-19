@@ -1,0 +1,36 @@
+# --- 데이터 (레포에 올리지 않는다) ---
+# COCO 원본 이미지는 Flickr 개별 라이선스(다수가 NoDerivs/NonCommercial)라
+# 재배포 대상이 아니다. manifest.json 의 URL 로 언제든 재다운로드 가능.
+data/raw/
+data/interim/
+data/dataset/
+*.zip
+!requirements*.zip
+
+# --- 모델 체크포인트 / 캐시 ---
+checkpoints/
+weights/
+*.pt
+*.pth
+*.safetensors
+*.ckpt
+.cache/
+hf_cache/
+
+# --- 산출물 중 무거운 것 ---
+runs/
+outputs/
+wandb/
+
+# reports/ 는 커밋한다 (표·figure 가 근거 자료)
+!reports/
+!reports/figures/*.png
+
+# --- python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+*.egg-info/

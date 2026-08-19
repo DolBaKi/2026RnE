@@ -1,0 +1,30 @@
+# 저화질 영상 희소 객체 인식 — 데이터 구축 파이프라인 의존성
+#
+# torch 는 CUDA 빌드를 별도 인덱스에서 받아야 하므로 여기에 고정하지 않는다.
+# 확인된 개발 환경: torch 2.8.0+cu126 / RTX 4060 Laptop 8GB / Python 3.11.5
+#   pip install torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cu126
+
+# 생성 모델
+diffusers>=0.31
+transformers>=4.44
+accelerate>=0.34
+safetensors>=0.4
+sentencepiece>=0.2
+
+# 검출 / 자동 라벨링
+ultralytics>=8.3
+
+# 영상 처리 · 열화 시뮬레이션
+opencv-python>=4.10
+pillow>=10.0
+numpy>=1.26
+scipy>=1.13
+
+# 품질 지표 (FID / CLIP 유사도) 및 중복 제거
+torchmetrics>=1.4
+torchmetrics[image]
+
+# 집계 · 리포트
+pandas>=2.2
+matplotlib>=3.9
+PyYAML>=6.0

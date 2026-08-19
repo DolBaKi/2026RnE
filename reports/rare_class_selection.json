@@ -1,0 +1,165 @@
+{
+  "thresholds": {
+    "q1_instance_count": 4327.75,
+    "q1_n_small": 619.5,
+    "total_instances": 860001
+  },
+  "S1_scarce_classes": [
+    "bed",
+    "toilet",
+    "baseball glove",
+    "oven",
+    "baseball bat",
+    "hot dog",
+    "keyboard",
+    "snowboard",
+    "frisbee",
+    "refrigerator",
+    "mouse",
+    "stop sign",
+    "toothbrush",
+    "fire hydrant",
+    "microwave",
+    "scissors",
+    "bear",
+    "parking meter",
+    "toaster",
+    "hair drier"
+  ],
+  "S2_small_scarce_classes": [
+    "tv",
+    "couch",
+    "giraffe",
+    "teddy bear",
+    "cat",
+    "train",
+    "sandwich",
+    "bed",
+    "toilet",
+    "oven",
+    "keyboard",
+    "refrigerator",
+    "stop sign",
+    "fire hydrant",
+    "microwave",
+    "scissors",
+    "bear",
+    "parking meter",
+    "toaster",
+    "hair drier"
+  ],
+  "all_three_criteria": [
+    {
+      "class": "bear",
+      "n_inst": 1294,
+      "n_img": 960,
+      "rank": 77,
+      "n_small": 37,
+      "small_ratio": 0.0285935085007728,
+      "share_pct": 0.15046494131983568
+    }
+  ],
+  "wildlife_ranked_by_n_small": [
+    {
+      "class": "bear",
+      "n_inst": 1294,
+      "n_img": 960,
+      "rank": 77,
+      "n_small": 37,
+      "small_ratio": 0.0285935085007728,
+      "share_pct": 0.15046494131983568
+    },
+    {
+      "class": "cat",
+      "n_inst": 4768,
+      "n_img": 4114,
+      "rank": 58,
+      "n_small": 126,
+      "small_ratio": 0.026426174496644295,
+      "share_pct": 0.5544179599791162
+    },
+    {
+      "class": "giraffe",
+      "n_inst": 5131,
+      "n_img": 2546,
+      "rank": 54,
+      "n_small": 425,
+      "small_ratio": 0.0828298577275385,
+      "share_pct": 0.5966272132241707
+    },
+    {
+      "class": "dog",
+      "n_inst": 5508,
+      "n_img": 4385,
+      "rank": 50,
+      "n_small": 669,
+      "small_ratio": 0.12145969498910675,
+      "share_pct": 0.6404643715530564
+    },
+    {
+      "class": "zebra",
+      "n_inst": 5303,
+      "n_img": 1916,
+      "rank": 52,
+      "n_small": 740,
+      "small_ratio": 0.13954365453516876,
+      "share_pct": 0.6166271899683837
+    },
+    {
+      "class": "elephant",
+      "n_inst": 5513,
+      "n_img": 2143,
+      "rank": 49,
+      "n_small": 747,
+      "small_ratio": 0.13549791402140396,
+      "share_pct": 0.6410457662258532
+    },
+    {
+      "class": "horse",
+      "n_inst": 6587,
+      "n_img": 2941,
+      "rank": 31,
+      "n_small": 1472,
+      "small_ratio": 0.22347047214209806,
+      "share_pct": 0.7659293419426256
+    },
+    {
+      "class": "cow",
+      "n_inst": 8147,
+      "n_img": 1968,
+      "rank": 22,
+      "n_small": 3190,
+      "small_ratio": 0.3915551736835645,
+      "share_pct": 0.947324479855256
+    },
+    {
+      "class": "sheep",
+      "n_inst": 9509,
+      "n_img": 1529,
+      "rank": 16,
+      "n_small": 4185,
+      "small_ratio": 0.4401093700704596,
+      "share_pct": 1.1056963887251294
+    },
+    {
+      "class": "bird",
+      "n_inst": 10806,
+      "n_img": 3237,
+      "rank": 12,
+      "n_small": 6904,
+      "small_ratio": 0.6389043124190265,
+      "share_pct": 1.2565101668486431
+    }
+  ],
+  "meta": {
+    "n_images": 118287,
+    "n_annotations": 860001,
+    "n_classes": 80,
+    "total_instances": 860001
+  },
+  "figures": [
+    "fig01_class_distribution.png",
+    "fig02_animal_classes.png",
+    "fig03_scarcity_vs_smallcount.png"
+  ]
+}

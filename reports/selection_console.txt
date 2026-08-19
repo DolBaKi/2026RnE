@@ -1,0 +1,42 @@
+[meta] {'n_images': 118287, 'n_annotations': 860001, 'n_classes': 80, 'total_instances': 860001}
+[thresh] S1 Q1(n_inst)=4,328   S2 Q1(n_small)=620
+
+[인스턴스 수 하위 10]
+  71. mouse            n=  2,262 img= 1,876 small= 1,291 (0.571) electronic
+  72. stop sign        n=  1,983 img= 1,734 small=   606 (0.306) outdoor
+  73. toothbrush       n=  1,954 img= 1,007 small= 1,250 (0.640) indoor
+  74. fire hydrant     n=  1,865 img= 1,711 small=   453 (0.243) outdoor
+  75. microwave        n=  1,673 img= 1,547 small=   146 (0.087) appliance
+  76. scissors         n=  1,481 img=   947 small=   518 (0.350) indoor
+  77. bear             n=  1,294 img=   960 small=    37 (0.029) animal
+  78. parking meter    n=  1,285 img=   705 small=   595 (0.463) outdoor
+  79. toaster          n=    225 img=   217 small=    51 (0.227) appliance
+  80. hair drier       n=    198 img=   189 small=    76 (0.384) indoor
+
+[small 인스턴스 수 하위 10]
+  refrigerator     small=    22  n=  2,637  rank=70
+  bear             small=    37  n=  1,294  rank=77
+  bed              small=    40  n=  4,192  rank=61
+  toaster          small=    51  n=    225  rank=79
+  couch            small=    75  n=  5,779  rank=45
+  hair drier       small=    76  n=    198  rank=80
+  oven             small=   119  n=  3,334  rank=64
+  cat              small=   126  n=  4,768  rank=58
+  microwave        small=   146  n=  1,673  rank=75
+  train            small=   149  n=  4,571  rank=59
+
+[야생동물 도메인 — small 인스턴스 오름차순]
+  bear       small=    37  n=  1,294  img=   960  rank=77
+  cat        small=   126  n=  4,768  img= 4,114  rank=58
+  giraffe    small=   425  n=  5,131  img= 2,546  rank=54
+  dog        small=   669  n=  5,508  img= 4,385  rank=50
+  zebra      small=   740  n=  5,303  img= 1,916  rank=52
+  elephant   small=   747  n=  5,513  img= 2,143  rank=49
+  horse      small= 1,472  n=  6,587  img= 2,941  rank=31
+  cow        small= 3,190  n=  8,147  img= 1,968  rank=22
+  sheep      small= 4,185  n=  9,509  img= 1,529  rank=16
+  bird       small= 6,904  n= 10,806  img= 3,237  rank=12
+
+[3중 기준 동시 충족] ['bear']
+[S1 20개] ['bed', 'toilet', 'baseball glove', 'oven', 'baseball bat', 'hot dog', 'keyboard', 'snowboard', 'frisbee', 'refrigerator', 'mouse', 'stop sign', 'toothbrush', 'fire hydrant', 'microwave', 'scissors', 'bear', 'parking meter', 'toaster', 'hair drier']
+[S2 20개] ['tv', 'couch', 'giraffe', 'teddy bear', 'cat', 'train', 'sandwich', 'bed', 'toilet', 'oven', 'keyboard', 'refrigerator', 'stop sign', 'fire hydrant', 'microwave', 'scissors', 'bear', 'parking meter', 'toaster', 'hair drier']

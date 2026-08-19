@@ -1,0 +1,58 @@
+# 저화질 영상 희소 객체 데이터 구축 — 파이프라인 설정
+# 1차에서 확정된 값만 채워져 있다. generation/degradation/labeling 은 2차에서 확정.
+
+target:
+  class_name: bear
+  coco_category_id: 23      # instances_train2017.json 의 category_id
+  yolo_class_index: 21      # COCO 80클래스 순서상 index (사전학습 YOLO 기준)
+  dataset_class_index: 0    # 본 데이터셋은 단일 클래스이므로 0
+  selection_rationale: docs/01_class_distribution_analysis.md
+
+# 1차 분석에서 산출된 선정 근거 (scripts/01 재실행 시 동일하게 재현됨)
+selection_evidence:
+  source: instances_train2017.json
+  sha256_archive: 113a836d90195ee1f884e704da6304dfaaecff1f023f49b6ca93c4aaae470268
+  total_instances: 860001
+  criteria:
+    S1_instance_count:
+      threshold_q1: 4328
+      bear_value: 1294
+      bear_rank: 77          # /80
+    S2_small_instance_count:
+      definition: "COCO area < 32^2 인 인스턴스의 절대 개수"
+      threshold_q1: 620
+      bear_value: 37
+    S3_domain: 야생동물 활동 영상 / 실외 감시
+  classes_passing_all_three: [bear]
+
+# 실데이터 기준셋 — 학습에 쓰지 않는다
+real_sets:
+  real_val:
+    source: coco val2017 (bear 전량)
+    n_images: 49
+    n_boxes: 71
+    size_bins: {large: 53, medium: 13, small: 5}
+    use: 홀드아웃 평가 전용
+  real_ref:
+    source: coco train2017 (image_id 오름차순 400장)
+    n_images: 400
+    n_boxes: 534
+    size_bins: {large: 412, medium: 109, small: 13}
+    use: FID/CLIP 참조 및 프롬프트 설계
+
+# --- 2차에서 확정 ---
+generation:
+  backends: []          # 예: sdxl-turbo (t2i), sd-inpainting (mask→bbox)
+  # model_id / revision / checkpoint sha / scheduler / steps / guidance / seed 기록 예정
+
+degradation:
+  # 실제 저화질 감시 영상 특성을 순차 적용: 모션블러 → 다운스케일 → 노이즈 → 압축
+  stages: []
+
+labeling:
+  method: []            # inpainting mask 유래 bbox + 검출기 pseudo-label 교차검증
+  quality_gates: []     # det confidence / CLIP sim / perceptual hash dedup / 사람 검수
+
+target_distribution:
+  # real_val 이 large 편중(53/71)이므로 생성 데이터는 결핍 구간(small)을 다수로 둔다
+  size_bins: {}         # 2차에서 수치 고정
