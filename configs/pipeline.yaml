@@ -40,19 +40,36 @@ real_sets:
     size_bins: {large: 412, medium: 109, small: 13}
     use: FID/CLIP 참조 및 프롬프트 설계
 
-# --- 2차에서 확정 ---
+# --- 2차 확정 ---
+# 최초 계획은 "inpainting으로 마스크에서 직접 bbox"였으나, 512 캔버스에서 32px
+# 마스크는 latent 4px 미만이라 디퓨전이 의미 있는 디테일을 만들지 못해 폐기.
+# 대신 전경(큰 스케일 곰)과 배경을 각각 생성 → 프로그램적으로 합성 → bbox는
+# 합성 좌표 그 자체로 확정하는 방식으로 전환 (docs/02_generation_pipeline.md 참고).
 generation:
-  backends: []          # 예: sdxl-turbo (t2i), sd-inpainting (mask→bbox)
-  # model_id / revision / checkpoint sha / scheduler / steps / guidance / seed 기록 예정
+  backends:
+    - name: sdxl-turbo
+      hf_id: stabilityai/sdxl-turbo
+      role: [bear_foreground_t2i, background_scene_t2i]
+      dtype: fp16
+      steps: 2
+      guidance_scale: 0.0
+      resolution: 512
+    - name: clip-vit-base-patch32
+      hf_id: openai/clip-vit-base-patch32
+      role: quality_gate_classifier
 
 degradation:
-  # 실제 저화질 감시 영상 특성을 순차 적용: 모션블러 → 다운스케일 → 노이즈 → 압축
-  stages: []
+  # src/rareobj/degrade.py — 실제 저화질 감시 영상 순서 그대로 순차 적용
+  stages: [motion_blur, downscale_roundtrip, sensor_noise, jpeg_recompress]
+  ranges: 참조 src/rareobj/degrade.py:RANGES
 
 labeling:
-  method: []            # inpainting mask 유래 bbox + 검출기 pseudo-label 교차검증
-  quality_gates: []     # det confidence / CLIP sim / perceptual hash dedup / 사람 검수
+  method: composite_exact_bbox   # GrabCut 컷아웃을 지정 좌표에 합성 → 라벨은 합성 좌표
+  quality_gates:
+    - grabcut_area_frac: [0.03, 0.92]
+    - clip_top1_is_bear_margin: 0.20
+    - phash_hamming_dedup_min: 6
 
 target_distribution:
-  # real_val 이 large 편중(53/71)이므로 생성 데이터는 결핍 구간(small)을 다수로 둔다
-  size_bins: {}         # 2차에서 수치 고정
+  # real_val 이 large 편중(53/71 large)이므로 생성 데이터는 결핍 구간(small)을 다수로 둔다
+  size_bins: {small: 0.60, medium: 0.30, large: 0.10}
