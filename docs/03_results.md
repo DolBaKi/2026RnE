@@ -68,23 +68,58 @@
 "저화질 곰 검출을 개선한다"는 목표 자체는 달성됐고, 그 개선이 공짜가 아니라는
 것까지 같이 확인된 것이 이 실험의 값어치다.
 
-## 3.4 한계와 다음 단계
+## 3.4 4차 — 재앙적 망각 완화 시도 (정칙화 오버샘플링)
+
+§3.3에서 지목한 원인("bear_synth:reg_fit ≈ 2.2:1로 배치가 곰에 쏠림")을 실제로
+바꿔서 검증했다. `reg_fit`(245장)을 곰 데이터(540장)와 거의 1:1이 되도록
+반복 복사(오버샘플링)해서 **다른 하이퍼파라미터는 전부 동일하게 고정**하고
+다시 학습했다(`scripts/10_finetune_balanced.py`).
+
+| 세트 | 지표 | baseline | v1 (2.2:1) | v2 (1:1 오버샘플링) | v2-v1 |
+|---|---|---|---|---|---|
+| real_val (원본화질) | mAP@0.5 | 0.904 | 0.501 | 0.448 | **-0.053** |
+| real_val (원본화질) | precision | 0.873 | 0.853 | 0.643 | -0.210 |
+| real_val_lq (열화) | mAP@0.5 | 0.399 | 0.478 | 0.497 | +0.019 |
+| real_val_lq (열화) | precision | 0.660 | 0.619 | 0.677 | +0.058 |
+| reg_holdout (79클래스) | mAP@0.5 | 0.728 | 0.474 | 0.494 | +0.020 |
+| reg_holdout (79클래스) | mAP@0.5:0.95 | 0.571 | 0.302 | 0.331 | +0.029 |
+
+![v1 vs v2](figures/fig08_v1_vs_v2.png)
+
+**가설은 부분적으로만 맞았다.** reg_holdout이 소폭 올랐고(+0.020) real_val_lq도
+같이 좋아졌다(+0.019, precision +0.058) — 방향은 맞다. 하지만 크기가 작다.
+v1이 baseline 대비 벌어진 격차(0.728-0.474=0.254)의 8%만 좁혔을 뿐, 여전히
+baseline과 0.234p 차이가 남아 있다(0.728 vs 0.494). 오히려 real_val(원본화질)은
+더 나빠졌다(-0.053, precision -0.210) —
+원인은 반복 복사로 학습 스텝 자체가 늘어나면서(reg_fit이 이미지당 여러 번
+등장) 40 epoch 고정 기준으로는 상대적으로 더 오래/많이 학습된 셈이 되어
+과적합 방향이 바뀐 것으로 보인다.
+
+**결론: 표본 비율 하나만 바꿔서는 이 트레이드오프가 풀리지 않는다.** 데이터
+비율보다 학습 스케줄(에폭 수를 표본 총량에 맞춰 재조정) 또는 freeze 깊이 쪽
+변수가 더 크게 작용하고 있을 가능성이 높다 — 다음 시도 항목으로 아래 표에
+반영했다.
+
+## 3.5 한계와 다음 단계
 
 | 한계 | 원인 추정 | 다음 시도 |
 |---|---|---|
 | 원본 화질 성능 퇴보 | 학습 데이터가 small에 과도하게 쏠림(62%) | bear_synth 크기 분포를 real_val 실제 비율에 더 가깝게 완화하거나, large 비중을 높인 버전을 별도로 섞기 |
-| 재앙적 망각 | 정칙화 표본이 상대적으로 적음(245장 vs 540장) | reg_sample 규모 확대 또는 학습 배치 내 오버샘플링으로 1:1에 가깝게 |
+| 재앙적 망각 (일부만 완화됨) | §3.4에서 표본 비율을 1:1로 맞춰봤지만 baseline 대비 격차의 8%만 좁혀짐 — 원인이 비율보다는 학습 스케줄(오버샘플링으로 늘어난 반복 학습량) 쪽일 가능성 | epoch 수를 표본 총량에 맞춰 재조정하거나, reg_holdout 지표 기준 조기 종료(현재 patience는 bear 전용 val fitness만 봄) 도입 |
 | GrabCut 잔여 배경 조각 | 스튜디오풍 배경에 소품(암석 등)이 섞여 나온 경우 전경에 포함됨 (fig06 large/day 샘플 참고) | 컷아웃 후 최대 연결요소만 남기는 후처리 추가 |
 | 색상 정합 | 밝기만 맞추고 색조(hue)는 맞추지 않음 | LAB 공간 색 전이(color transfer)로 확장 |
-| 1회 실행 결과 | 시드 1개, 파인튜닝 1회 | 시드 반복 및 freeze/lr/분포 그리드 탐색 |
+| 1회 실행 결과 | 시드 1개, 파인튜닝 2회(v1/v2) | 시드 반복 및 freeze/lr/분포 그리드 탐색 |
 
-## 3.5 산출물 경로
+## 3.6 산출물 경로
 
 ```
 data/dataset/bear_synth/                합성 데이터셋 (제출 zip의 본체)
 data/interim/real_bear/real_val_lq/     열화 적용 실데이터 평가셋 (비제출, 재현 가능)
-reports/eval_baseline_vs_finetuned.json 원자료
-reports/eval_results.md                 표
-reports/figures/fig07_ap_comparison.png 그래프
-runs/finetune_bear/                     ultralytics 학습 로그·가중치
+reports/eval_baseline_vs_finetuned.json v1(불균형 2.2:1) 원자료
+reports/eval_v1_vs_v2.json              baseline·v1·v2 통합 원자료
+reports/eval_results.md                 v1/v2 비교표 (최신)
+reports/figures/fig07_ap_comparison.png v1 vs baseline 그래프
+reports/figures/fig08_v1_vs_v2.png      baseline·v1·v2 비교 그래프
+runs/finetune_bear/                     v1 ultralytics 학습 로그·가중치
+runs/finetune_bear_v2/                  v2(정칙화 오버샘플링) 학습 로그·가중치
 ```
