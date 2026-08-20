@@ -10,6 +10,7 @@ transformers>=4.44
 accelerate>=0.34
 safetensors>=0.4
 sentencepiece>=0.2
+hf_transfer>=0.1   # HF_HUB_ENABLE_HF_TRANSFER=1 — 대용량 체크포인트 다운로드 가속/재시도 안정화
 
 # 검출 / 자동 라벨링
 ultralytics>=8.3

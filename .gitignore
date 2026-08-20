@@ -26,6 +26,9 @@ wandb/
 !reports/
 !reports/figures/*.png
 
+# --- 하네스 내부 상태 ---
+.claude/scheduled_tasks.lock
+
 # --- python ---
 __pycache__/
 *.py[cod]
