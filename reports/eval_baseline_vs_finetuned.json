@@ -1,0 +1,44 @@
+{
+  "baseline": {
+    "real_val": {
+      "tag": "baseline/real_val",
+      "map50": 0.9037942297596598,
+      "map5095": 0.7504704600396204,
+      "precision": 0.8734782528848719,
+      "recall": 0.8309859154929577
+    },
+    "real_val_lq": {
+      "tag": "baseline/real_val_lq",
+      "map50": 0.39882519483880186,
+      "map5095": 0.25277391906690744,
+      "precision": 0.659603010696629,
+      "recall": 0.28169014084507044
+    },
+    "reg_holdout": {
+      "tag": "baseline/reg_holdout",
+      "map50": 0.7283700888472018,
+      "map5095": 0.5705412852041523
+    }
+  },
+  "finetuned": {
+    "real_val": {
+      "tag": "finetuned/real_val",
+      "map50": 0.5014501302809193,
+      "map5095": 0.3432132215163946,
+      "precision": 0.8525321369922203,
+      "recall": 0.30985915492957744
+    },
+    "real_val_lq": {
+      "tag": "finetuned/real_val_lq",
+      "map50": 0.47791638526144975,
+      "map5095": 0.2974926300156122,
+      "precision": 0.6192067212188336,
+      "recall": 0.4507042253521127
+    },
+    "reg_holdout": {
+      "tag": "finetuned/reg_holdout",
+      "map50": 0.4742352636308407,
+      "map5095": 0.30197709943042594
+    }
+  }
+}

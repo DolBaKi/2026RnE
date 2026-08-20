@@ -17,6 +17,11 @@
 > 같은 도메인의 `bird`(6,904개)의 **1/187**.
 > 사전학습 YOLO는 곰을 작고 흐릿한 형태로 본 경험이 사실상 없다.
 
+> **baseline 자체가 문제를 증명한다** — 사전학습 YOLO의 bear mAP@0.5는 원본 화질
+> 0.904 → 동일 71박스에 열화만 적용하면 0.399로 반토막난다. 생성 데이터로
+> 파인튜닝하면 그 저화질 조건에서 0.399→0.478(+0.079), recall 0.282→0.451로
+> 회복한다 — 단, 원본 화질·다른 79클래스 성능은 대가로 낮아진다(§[03_results](docs/03_results.md)).
+
 ---
 
 ## 진행 상태
@@ -24,30 +29,37 @@
 | 차수 | 내용 | 상태 |
 |---|---|---|
 | **1차** | 분포 전수 분석 → 희소 클래스 선정, 실데이터 기준셋 구축, 레포 골격 | ✅ 완료 |
-| **2차** | 열화 모델 + 생성 파이프라인(t2i / inpainting) + 자동 라벨링 + 품질 게이트 | ⬜ |
-| **3차** | 데이터셋 zip 패키징, 파이프라인 문서 완성, YOLO 재학습 검증 | ⬜ |
+| **2차** | 열화 모델 + 생성 파이프라인(전경/배경 분리 합성) + 자동 라벨링 + 품질 게이트 | ✅ 완료 |
+| **3차** | 데이터셋 zip 패키징, 파이프라인 문서 완성, YOLO 재학습 검증 | ✅ 완료 |
 
 제출물(7/2 공지 기준)
-1. 희소 객체 데이터셋 zip → 3차
-2. 생성모델 기반 데이터 수집 과정 문서 (파이프라인, 모델 HF/GitHub 주소·체크포인트·파라미터) → 2·3차
+1. 희소 객체 데이터셋 zip → `submission/bear_synth_dataset.zip`
+2. 생성모델 기반 데이터 수집 과정 문서 → [docs/02_generation_pipeline.md](docs/02_generation_pipeline.md),
+   결과는 [docs/03_results.md](docs/03_results.md)
 
 ## 구조
 
 ```
 2026_RnE/
-├─ configs/pipeline.yaml              파이프라인 단일 설정 (1차 값 확정)
+├─ configs/pipeline.yaml              파이프라인 단일 설정 (전 과정 확정값)
 ├─ docs/
-│  └─ 01_class_distribution_analysis.md   분포 분석 · 클래스 선정 근거
-├─ reports/
-│  ├─ coco_class_stats.{csv,md}       80클래스 전수 집계표
-│  ├─ rare_class_selection.json       선정 기준·임계·통과 클래스
-│  ├─ selection_console.txt           선정 과정 로그
-│  └─ figures/*.png                   근거 figure 3종
+│  ├─ 01_class_distribution_analysis.md   분포 분석 · 클래스 선정 근거
+│  ├─ 02_generation_pipeline.md            생성 파이프라인 · 사용 모델 · 파라미터
+│  └─ 03_results.md                        데이터셋 통계 · baseline 대비 평가 결과
+├─ reports/                            전수 집계표, 선정/평가 결과, figure 7종
 ├─ scripts/
 │  ├─ 00_download_coco.py             어노테이션 다운로드 + SHA-256 검증
 │  ├─ 01_analyze_coco_distribution.py 전수 집계 → 희소 클래스 선정
-│  └─ 02_build_real_bear_sets.py      실 bear 이미지 → YOLO 기준셋
-├─ src/rareobj/                       공용 모듈 (경로, figure 스타일)
+│  ├─ 02_build_real_bear_sets.py      실 bear 이미지 → YOLO 기준셋
+│  ├─ 03_build_lq_eval_set.py         real_val 열화 → real_val_lq 평가셋
+│  ├─ 04_generate_bear_foregrounds.py SDXL-Turbo 곰 전경 생성 + 품질 게이트
+│  ├─ 05_generate_backgrounds.py      SDXL-Turbo 배경 장면 생성
+│  ├─ 06_compose_dataset.py           합성 + 열화 → bear_synth YOLO 데이터셋
+│  ├─ 07_build_regularization_sample.py 다중 클래스 표본 (재앙적 망각 점검용)
+│  ├─ 08_train_eval_yolo.py           baseline vs 파인튜닝 평가
+│  └─ 09_package_submission.py        제출 zip 패키징
+├─ src/rareobj/                       공용 모듈 (경로, 열화, 합성, 생성모델 로더, figure 스타일)
+├─ submission/                        패키징된 제출 zip (.gitignore 대상)
 └─ data/                              .gitignore 대상 (재현 가능하므로 미커밋)
 ```
 
@@ -61,6 +73,13 @@ pip install -r requirements.txt
 python scripts/00_download_coco.py             # COCO 어노테이션 241 MB
 python scripts/01_analyze_coco_distribution.py # 집계표 + figure + 선정 결과
 python scripts/02_build_real_bear_sets.py      # 실 bear 이미지 449장 + YOLO 라벨
+python scripts/03_build_lq_eval_set.py         # real_val_lq 평가셋
+python scripts/04_generate_bear_foregrounds.py # 곰 전경 생성 (SDXL-Turbo, ~7GB 다운로드)
+python scripts/05_generate_backgrounds.py      # 배경 장면 생성
+python scripts/06_compose_dataset.py           # 합성 데이터셋 조립 (600장)
+python scripts/07_build_regularization_sample.py
+python scripts/08_train_eval_yolo.py           # baseline vs 파인튜닝 평가
+python scripts/09_package_submission.py        # 제출 zip
 ```
 
 검증된 실행 환경: Windows 11 / Python 3.11.5 / torch 2.8.0+cu126 /

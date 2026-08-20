@@ -85,7 +85,10 @@ def build_eval_yaml(name: str, img_dir: Path, lbl_dir: Path) -> Path:
         dst = d / "labels" / p.name
         if not dst.exists():
             shutil.copy(p, dst)
-    yml = {"path": str(d).replace("\\", "/"), "val": "images", "names": coco_names()}
+    # ultralytics check_det_dataset 은 train/val 키가 둘 다 있어야 한다.
+    # 평가 전용 세트라 둘 다 같은 이미지 폴더를 가리키게 하고 val 로만 평가한다.
+    yml = {"path": str(d).replace("\\", "/"), "train": "images", "val": "images",
+           "names": coco_names()}
     yml_path = d / "dataset.yaml"
     yml_path.write_text(yaml.safe_dump(yml, allow_unicode=True, sort_keys=False), encoding="utf-8")
     return yml_path
@@ -122,8 +125,8 @@ def build_reg_holdout_yaml() -> tuple[Path, Path]:
                 shutil.copy(src_img, d / "images" / r["file_name"])
             if src_lbl.exists():
                 shutil.copy(src_lbl, d / "labels" / f"{stem}.txt")
-        yml = {"path": str(d).replace("\\", "/"),
-               ("train" if tag == "reg_fit" else "val"): "images", "names": coco_names()}
+        yml = {"path": str(d).replace("\\", "/"), "train": "images", "val": "images",
+               "names": coco_names()}
         (d / "dataset.yaml").write_text(yaml.safe_dump(yml, allow_unicode=True, sort_keys=False),
                                         encoding="utf-8")
     return (paths.DATASET / "eval_sets" / "reg_fit" / "dataset.yaml",
@@ -131,46 +134,50 @@ def build_reg_holdout_yaml() -> tuple[Path, Path]:
 
 
 def build_train_mix_yaml(reg_fit_yaml: Path) -> Path:
-    """bear_synth(train split, class→21 재라벨) + reg_fit 을 한 학습셋으로 합친다."""
-    (TRAIN_ROOT / "images").mkdir(parents=True, exist_ok=True)
-    (TRAIN_ROOT / "labels").mkdir(parents=True, exist_ok=True)
+    """bear_synth(class→21 재라벨) + reg_fit 을 한 학습셋으로 합친다.
+
+    ultralytics의 img2label_paths()는 경로에 os.sep+'images'+os.sep 부분 문자열이
+    있어야 labels 디렉터리를 찾는다 (images_val 처럼 붙여 쓰면 인식 못해 라벨 0으로
+    처리됨 — 실제로 처음 겪은 버그). 그래서 images/train, images/val 처럼 표준
+    YOLO 중첩 구조를 그대로 따른다.
+    """
+    for split in ("train", "val"):
+        (TRAIN_ROOT / "images" / split).mkdir(parents=True, exist_ok=True)
+        (TRAIN_ROOT / "labels" / split).mkdir(parents=True, exist_ok=True)
 
     bear_img = paths.DATASET / "bear_synth" / "images" / "train"
     bear_lbl_src = paths.DATASET / "bear_synth" / "labels" / "train"
     bear_lbl_reidx = paths.INTERIM / "generated" / "bear_synth_labels_coco_idx"
     relabel_bear_synth_to_coco_index(bear_lbl_src, bear_lbl_reidx)
     for p in bear_img.glob("*.jpg"):
-        shutil.copy(p, TRAIN_ROOT / "images" / p.name)
+        shutil.copy(p, TRAIN_ROOT / "images" / "train" / p.name)
     for p in bear_lbl_reidx.glob("*.txt"):
-        shutil.copy(p, TRAIN_ROOT / "labels" / p.name)
+        shutil.copy(p, TRAIN_ROOT / "labels" / "train" / p.name)
 
     reg_fit_dir = reg_fit_yaml.parent
     for p in (reg_fit_dir / "images").glob("*.jpg"):
-        shutil.copy(p, TRAIN_ROOT / "images" / p.name)
+        shutil.copy(p, TRAIN_ROOT / "images" / "train" / p.name)
     for p in (reg_fit_dir / "labels").glob("*.txt"):
-        shutil.copy(p, TRAIN_ROOT / "labels" / p.name)
+        shutil.copy(p, TRAIN_ROOT / "labels" / "train" / p.name)
 
     bear_val_img = paths.DATASET / "bear_synth" / "images" / "val"
     bear_val_lbl_src = paths.DATASET / "bear_synth" / "labels" / "val"
     bear_val_lbl_reidx = paths.INTERIM / "generated" / "bear_synth_val_labels_coco_idx"
     relabel_bear_synth_to_coco_index(bear_val_lbl_src, bear_val_lbl_reidx)
-    (TRAIN_ROOT / "images_val").mkdir(parents=True, exist_ok=True)
-    (TRAIN_ROOT / "labels_val").mkdir(parents=True, exist_ok=True)
     for p in bear_val_img.glob("*.jpg"):
-        shutil.copy(p, TRAIN_ROOT / "images_val" / p.name)
+        shutil.copy(p, TRAIN_ROOT / "images" / "val" / p.name)
     for p in bear_val_lbl_reidx.glob("*.txt"):
-        shutil.copy(p, TRAIN_ROOT / "labels_val" / p.name)
+        shutil.copy(p, TRAIN_ROOT / "labels" / "val" / p.name)
 
     yml = {"path": str(TRAIN_ROOT).replace("\\", "/"),
-           "train": "images", "val": "images_val", "names": coco_names()}
+           "train": "images/train", "val": "images/val", "names": coco_names()}
     yml_path = TRAIN_ROOT / "dataset.yaml"
     yml_path.write_text(yaml.safe_dump(yml, allow_unicode=True, sort_keys=False), encoding="utf-8")
     return yml_path
 
 
 def eval_model(model: YOLO, data_yaml: Path, tag: str) -> dict:
-    m = model.val(data=str(data_yaml), classes=[BEAR_IDX], split="val" if "val" in
-                 yaml.safe_load(data_yaml.read_text(encoding="utf-8")) else "train",
+    m = model.val(data=str(data_yaml), classes=[BEAR_IDX], split="val",
                  verbose=False, plots=False)
     return {"tag": tag, "map50": float(m.box.map50), "map5095": float(m.box.map),
             "precision": float(m.box.mp), "recall": float(m.box.mr)}
@@ -208,7 +215,8 @@ def main() -> int:
     ft = YOLO(BASE_MODEL)
     ft.train(
         data=str(train_yaml), epochs=40, imgsz=512, batch=16,
-        lr0=0.0008, freeze=10, patience=15, seed=SEED,
+        optimizer="AdamW", lr0=0.0008, freeze=10, patience=15, seed=SEED,
+        workers=2,  # Windows: worker 수가 높으면 여러 epoch 뒤 WinError 1450(리소스 고갈)로 죽는 경우가 있었음
         project=str(RUNS), name="finetune_bear", exist_ok=True, verbose=False, plots=True,
     )
 
