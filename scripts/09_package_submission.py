@@ -1,14 +1,17 @@
 """제출용 zip 패키징.
 
 담는 것 — 전부 생성물이거나 우리가 만든 파생 자료 (재배포 문제 없음)
-  data/dataset/bear_synth/{images,labels,dataset.yaml,manifest.jsonl}
+  data/dataset/bear_synth_v2/{images,labels,dataset.yaml,manifest.jsonl}
+  (5차 방법론 반영판 — clean+Albumentations열화 쌍. 1~4차에서 쓴 bear_synth(v1,
+  열화본만)는 docs/03_results.md 재현용으로 남겨두되 제출 데이터셋은 최신
+  방법론을 반영한 v2로 낸다.)
   reports/*, docs/*, configs/pipeline.yaml
 
 담지 않는 것
   실제 COCO 이미지(real_val/real_ref) — Flickr 개별 라이선스라 재배포 대상 아님.
   대신 manifest.json(URL) 으로 재구성 가능하도록 스크립트만 포함.
-  모델 체크포인트 자체(수 GB) — HF 모델 ID로 누구나 재현 가능하므로 zip에 무게를
-  싣지 않는다. runs/finetune 학습 결과(가중치 .pt)는 크기가 작으면 포함, 크면 제외.
+  모델 체크포인트 자체(수 GB) — HF/GitHub 링크로 누구나 재현 가능하므로 zip에
+  무게를 싣지 않는다. runs/finetune 학습 결과(가중치 .pt)도 제외.
 """
 
 from __future__ import annotations
@@ -42,12 +45,12 @@ def add_dir(zf: zipfile.ZipFile, src: Path, arc_prefix: str) -> int:
 
 def main() -> int:
     OUT_ZIP.parent.mkdir(parents=True, exist_ok=True)
-    bear_synth = paths.DATASET / "bear_synth"
+    bear_synth = paths.DATASET / "bear_synth_v2"
     if not bear_synth.exists():
-        raise SystemExit(f"먼저 06_compose_dataset.py 실행: {bear_synth} 없음")
+        raise SystemExit(f"먼저 13_compose_dataset_v2.py 실행: {bear_synth} 없음")
 
     with zipfile.ZipFile(OUT_ZIP, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
-        n = add_dir(zf, bear_synth, "bear_synth")
+        n = add_dir(zf, bear_synth, "bear_synth_v2")
         zf.write(paths.CONFIGS / "pipeline.yaml", "pipeline.yaml")
     size_mb = OUT_ZIP.stat().st_size / 1e6
     print(f"[dataset zip] {OUT_ZIP}  {n}개 파일  {size_mb:.1f} MB")

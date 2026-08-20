@@ -12,6 +12,7 @@ INTERIM = DATA / "interim"
 DATASET = DATA / "dataset"
 
 COCO_ANN = RAW / "coco" / "annotations"
+CHECKPOINTS = RAW / "checkpoints"
 
 DOCS = ROOT / "docs"
 REPORTS = ROOT / "reports"
@@ -20,5 +21,5 @@ CONFIGS = ROOT / "configs"
 
 
 def ensure() -> None:
-    for p in (RAW, INTERIM, DATASET, REPORTS, FIGURES, DOCS, CONFIGS):
+    for p in (RAW, INTERIM, DATASET, REPORTS, FIGURES, DOCS, CONFIGS, CHECKPOINTS):
         p.mkdir(parents=True, exist_ok=True)

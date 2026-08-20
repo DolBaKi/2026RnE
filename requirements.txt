@@ -13,13 +13,28 @@ sentencepiece>=0.2
 hf_transfer>=0.1   # HF_HUB_ENABLE_HF_TRANSFER=1 — 대용량 체크포인트 다운로드 가속/재시도 안정화
 
 # 검출 / 자동 라벨링
-ultralytics>=8.3
+ultralytics>=8.4.123   # YOLO26 은 이 버전부터 포함 (8.3.x 에는 없음)
 
 # 영상 처리 · 열화 시뮬레이션
 opencv-python>=4.10
 pillow>=10.0
 numpy>=1.26
 scipy>=1.13
+
+# 열화(블러/다운스케일) 증강 — Albumentations
+#
+# 주의: albumentations 최신판(2.x) 이 요구하는 albucore 최신판(0.1.x+)은
+# torch>=2.13 을 강제한다. 이걸 그대로 깔면 pip 리졸버가 기존 CUDA 빌드
+# torch(2.8.0+cu126)를 CPU 전용 2.13으로 갈아치우면서 GPU 파이프라인 전체가
+# 죽는다 (실제로 겪은 사고 — 반드시 --no-deps 로 아래 조합을 정확히 고정할 것).
+#   pip install --no-deps albumentations==1.4.15 albucore==0.0.15
+# albucore==0.0.15 는 numpy/opencv-python-headless 만 요구하며 torch 의존성이
+# 없다 — 두 패키지는 하루 차이(2024-09-12/13)로 나온 서로 맞는 버전 쌍이다.
+# opencv-python-headless 는 따로 설치하지 않는다 — opencv-python/-contrib-python
+# 이 이미 cv2 네임스페이스를 제공하고, headless를 추가로 깔면 cv2가 5.x로
+# 바뀌며 충돌한다(설치했다 지우면 cv2 자체가 깨짐 — 겪은 사고).
+albumentations==1.4.15
+albucore==0.0.15
 
 # 품질 지표 (FID / CLIP 유사도) 및 중복 제거
 torchmetrics>=1.4
