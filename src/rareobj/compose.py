@@ -45,6 +45,26 @@ def grabcut_segment(bgr: np.ndarray, margin_frac: float = 0.06) -> np.ndarray | 
     fg = cv2.morphologyEx(fg, cv2.MORPH_CLOSE, k)
     if fg.sum() == 0:
         return None
+
+    # 배경이 완전히 단색이 아니면(예: 흐린 보케) GrabCut이 배경의 밝은 얼룩을
+    # 전경으로 잘못 잡아 본체와 분리된 조각을 같이 포함시키는 경우가 실제로
+    # 많았다(CCTV 8클래스 전경 생성 1차 시도에서 person/car/motorcycle/handbag/
+    # suitcase가 이 패턴으로 깨짐). 가장 큰 연결요소만 남기고, 그마저도 너무
+    # 조각나 있으면(볼록껍질 대비 채움비 낮음) 실패로 처리한다.
+    n_labels, labels, stats, _ = cv2.connectedComponentsWithStats(fg, connectivity=8)
+    if n_labels <= 1:
+        return None
+    largest = 1 + int(np.argmax(stats[1:, cv2.CC_STAT_AREA]))
+    fg = np.where(labels == largest, 255, 0).astype(np.uint8)
+
+    contours, _ = cv2.findContours(fg, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if not contours:
+        return None
+    hull_area = cv2.contourArea(cv2.convexHull(max(contours, key=cv2.contourArea)))
+    solidity = fg.sum() / 255 / max(hull_area, 1)
+    if solidity < 0.30:
+        return None  # 볼록껍질 대비 실제 채움비가 낮음 = 파편화된 분할
+
     return fg
 
 

@@ -27,12 +27,20 @@
 > 아니라 그 열화 함수의 특정 시그니처에 대한 과적합이었을 가능성이 높다 —
 > 자세한 진단은 [docs/04_yolo26_pipeline.md](docs/04_yolo26_pipeline.md) §4.5.
 >
-> **6차(CCTV 파일럿)에서 다른 도메인·다른 클래스로 독립 재현했다** — 사람·
-> 자전거·차량·가방 등 8개 흔한 클래스로 저화질 CCTV 탐지를 시도했더니, 여기서도
-> 파인튜닝은 개선이 아니라 악화(-0.090)였고, 복원 전처리도 똑같이(오히려 더
-> 심하게) 성능을 무너뜨렸다(0.513→0.054). 서로 다른 데이터·클래스·도메인에서
-> 같은 결론에 독립적으로 도달했다는 것이 결론의 신뢰도를 높인다 —
+> **6차(CCTV 파일럿, 실사진+열화)에서 다른 도메인·다른 클래스로 독립
+> 재현했다** — 사람·자전거·차량·가방 등 8개 흔한 클래스로 저화질 CCTV 탐지를
+> 시도했더니, 여기서도 파인튜닝은 개선이 아니라 악화(-0.090)였고, 복원
+> 전처리도 똑같이(오히려 더 심하게) 성능을 무너뜨렸다(0.513→0.054) —
 > [docs/05_cctv_pipeline.md](docs/05_cctv_pipeline.md) §5.5.
+>
+> **7차에서 bear와 완전히 동일한 구조(생성모델로 부족한 조건을 직접 만들어
+> 학습)로 CCTV를 다시 시도하자 훨씬 더 나쁜 결과가 나왔다** — 순수 생성
+> 데이터(840장)로만 파인튜닝하니 진짜 저화질에서 -0.389, **학습에 전혀
+> 쓰이지 않은 일반 실사진에서조차** -0.278 악화됐다. 이 프로젝트 전체의
+> 결론: **생성형 데이터 증강은 사전학습이 "거의 모르는" 조건(bear)에서만
+> 위험이 적고, 이미 강한 지식(흔한 클래스의 실사진 인식)을 소량의 순수
+> 합성 데이터로 덮어쓰면 오히려 크게 해롭다** —
+> [docs/06_cctv_generative.md](docs/06_cctv_generative.md) §6.5.
 
 ---
 
@@ -45,13 +53,17 @@
 | **3차** | 데이터셋 zip 패키징, 파이프라인 문서 완성, YOLO 재학습 검증 | ✅ 완료 |
 | **4차** | 재앙적 망각 완화 실험(정칙화 오버샘플링 1:1, v1 대비 비교) | ✅ 완료 |
 | **5차** | 방법론 개정(YOLO26·Albumentations·clean+deg 학습) + 진짜 저화질 평가(`real_lowq`) + NAFNet/Real-ESRGAN 복원 파이프라인 | ✅ 완료 |
-| **6차** | CCTV 다중 클래스(사람/차량/소지품) 파일럿 — 다른 도메인에서 5차 결론 재검증 | ✅ 완료 |
+| **6차** | CCTV 다중 클래스(사람/차량/소지품) 파일럿 (실사진+열화) — 5차 결론 재검증 | ✅ 완료 |
+| **7차** | CCTV 생성형 증강 파일럿 (bear와 동일 구조) — 순수 합성데이터의 도메인 갭 확인 | ✅ 완료 |
 
 5차는 지도 조교님의 연구방법 3.1~3.3 스펙을 반영해 1~4차의 핵심 가정 하나를
 재검증한 결과다 — 무엇이 왜 바뀌었는지는
 [docs/04_yolo26_pipeline.md](docs/04_yolo26_pipeline.md) §4.0에 표로 정리했다.
 6차는 bear라는 단일 희소 클래스를 넘어 흔한 다중 클래스·다른 도메인(CCTV)에서
-같은 실험 구조가 재현되는지 본 파일럿이다 — [docs/05_cctv_pipeline.md](docs/05_cctv_pipeline.md).
+같은 실험 구조가 재현되는지 본 파일럿이고 — [docs/05_cctv_pipeline.md](docs/05_cctv_pipeline.md) —
+7차는 6차가 놓쳤던 "생성모델로 부족한 조건을 직접 만든다"는 bear의 핵심
+구조를 CCTV에도 정확히 적용해 얻은, 이 프로젝트에서 가장 중요한 반례다 —
+[docs/06_cctv_generative.md](docs/06_cctv_generative.md).
 
 제출물(7/2 공지 기준)
 1. 희소 객체 데이터셋 zip → `submission/bear_synth_dataset.zip`
@@ -69,8 +81,9 @@
 │  ├─ 02_generation_pipeline.md            생성 파이프라인 · 사용 모델 · 파라미터
 │  ├─ 03_results.md                        1~4차 결과 (YOLOv8n, real_val_lq 기준)
 │  ├─ 04_yolo26_pipeline.md                5차: YOLO26·진짜 저화질 평가·복원 파이프라인
-│  └─ 05_cctv_pipeline.md                  6차: CCTV 다중 클래스 파일럿·재검증
-├─ reports/                            전수 집계표, 선정/평가 결과, figure 16종
+│  ├─ 05_cctv_pipeline.md                  6차: CCTV 다중 클래스 파일럿(실사진+열화)
+│  └─ 06_cctv_generative.md                7차: CCTV 생성형 증강 파일럿·도메인 갭 확인
+├─ reports/                            전수 집계표, 선정/평가 결과, figure 19종
 ├─ scripts/
 │  ├─ 00_download_coco.py             어노테이션 다운로드 + SHA-256 검증
 │  ├─ 01_analyze_coco_distribution.py 전수 집계 → 희소 클래스 선정
@@ -89,10 +102,14 @@
 │  ├─ 14_train_eval_yolo26.py         5차: YOLO26 학습 + 평가
 │  ├─ 15_restore_real_lowq.py         real_lowq에 복원 전처리 적용
 │  ├─ 16_eval_restored_only.py        복원본 재평가 (재학습 없이)
-│  ├─ 20_build_cctv_dataset.py        6차: CCTV 8클래스 clean+deg 데이터셋
-│  ├─ 21_build_cctv_real_lowq.py      6차: 진짜 저화질 실사진 평가셋
+│  ├─ 20_build_cctv_dataset.py        6차: CCTV 8클래스 clean+deg 데이터셋(실사진)
+│  ├─ 21_build_cctv_real_lowq.py      6차/7차: 진짜 저화질 실사진 평가셋
 │  ├─ 22_train_eval_cctv.py           6차: YOLO26 학습 + 평가
-│  └─ 23_restore_cctv_lowq.py         6차: 복원 전처리 적용
+│  ├─ 23_restore_cctv_lowq.py         6차/7차: 복원 전처리 적용
+│  ├─ 24_generate_cctv_foregrounds.py 7차: SDXL-Turbo 8클래스 전경 생성
+│  ├─ 25_generate_cctv_backgrounds.py 7차: CCTV 시점 배경 생성
+│  ├─ 26_compose_cctv_synth.py        7차: 다중클래스 장면 합성(생성데이터)
+│  └─ 27_train_eval_cctv_gen.py       7차: 생성데이터로 학습 + 평가
 ├─ src/rareobj/                       공용 모듈 (경로, 열화, 합성, 복원, 생성모델 로더, figure 스타일)
 │  └─ vendor/                         NAFNet/RRDBNet 아키텍처 벤더링 (basicsr 미설치)
 ├─ submission/                        패키징된 제출 zip (.gitignore 대상)
@@ -126,11 +143,17 @@ python scripts/14_train_eval_yolo26.py
 python scripts/15_restore_real_lowq.py
 python scripts/16_eval_restored_only.py
 
-# 6차 — CCTV 다중 클래스 파일럿 (다른 도메인에서 5차 결론 재검증)
+# 6차 — CCTV 다중 클래스 파일럿 (실사진+열화, 5차 결론 재검증)
 python scripts/20_build_cctv_dataset.py
 python scripts/21_build_cctv_real_lowq.py
 python scripts/23_restore_cctv_lowq.py
 python scripts/22_train_eval_cctv.py
+
+# 7차 — CCTV 생성형 증강 파일럿 (bear와 동일 구조)
+python scripts/24_generate_cctv_foregrounds.py
+python scripts/25_generate_cctv_backgrounds.py
+python scripts/26_compose_cctv_synth.py
+python scripts/27_train_eval_cctv_gen.py
 ```
 
 검증된 실행 환경: Windows 11 / Python 3.11.5 / torch 2.8.0+cu126 /
