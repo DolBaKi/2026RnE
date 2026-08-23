@@ -1,0 +1,48 @@
+{
+  "baseline": {
+    "real_lowq_cctv": {
+      "tag": "baseline/real_lowq_cctv",
+      "map50": 0.5130405413397088,
+      "map5095": 0.33001882740891325,
+      "precision": 0.6574774102664007,
+      "recall": 0.4496253564721341
+    },
+    "cctv_val": {
+      "tag": "baseline/cctv_val",
+      "map50": 0.35194772105660965,
+      "map5095": 0.2107915452170161,
+      "precision": 0.5070680642302015,
+      "recall": 0.3243158124698905
+    },
+    "real_lowq_cctv_restored": {
+      "tag": "baseline/real_lowq_cctv_restored",
+      "map50": 0.053846938539573744,
+      "map5095": 0.03501736553124589,
+      "precision": 0.39766825714885595,
+      "recall": 0.05682082380731593
+    }
+  },
+  "finetuned": {
+    "real_lowq_cctv": {
+      "tag": "finetuned/real_lowq_cctv",
+      "map50": 0.42318106864598964,
+      "map5095": 0.2553182038695403,
+      "precision": 0.5439088639108834,
+      "recall": 0.4047125340612907
+    },
+    "cctv_val": {
+      "tag": "finetuned/cctv_val",
+      "map50": 0.33959335158257387,
+      "map5095": 0.1830105360661814,
+      "precision": 0.5208745052962164,
+      "recall": 0.32452788623493545
+    },
+    "real_lowq_cctv_restored": {
+      "tag": "finetuned/real_lowq_cctv_restored",
+      "map50": 0.04626444092782433,
+      "map5095": 0.02721234224734509,
+      "precision": 0.41705199602807874,
+      "recall": 0.05194218561305443
+    }
+  }
+}

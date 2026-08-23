@@ -26,6 +26,13 @@
 > 흐리게 만든 `real_val_lq`에서만 개선(+0.079)이 보였던 건 실제 블러 강인성이
 > 아니라 그 열화 함수의 특정 시그니처에 대한 과적합이었을 가능성이 높다 —
 > 자세한 진단은 [docs/04_yolo26_pipeline.md](docs/04_yolo26_pipeline.md) §4.5.
+>
+> **6차(CCTV 파일럿)에서 다른 도메인·다른 클래스로 독립 재현했다** — 사람·
+> 자전거·차량·가방 등 8개 흔한 클래스로 저화질 CCTV 탐지를 시도했더니, 여기서도
+> 파인튜닝은 개선이 아니라 악화(-0.090)였고, 복원 전처리도 똑같이(오히려 더
+> 심하게) 성능을 무너뜨렸다(0.513→0.054). 서로 다른 데이터·클래스·도메인에서
+> 같은 결론에 독립적으로 도달했다는 것이 결론의 신뢰도를 높인다 —
+> [docs/05_cctv_pipeline.md](docs/05_cctv_pipeline.md) §5.5.
 
 ---
 
@@ -38,10 +45,13 @@
 | **3차** | 데이터셋 zip 패키징, 파이프라인 문서 완성, YOLO 재학습 검증 | ✅ 완료 |
 | **4차** | 재앙적 망각 완화 실험(정칙화 오버샘플링 1:1, v1 대비 비교) | ✅ 완료 |
 | **5차** | 방법론 개정(YOLO26·Albumentations·clean+deg 학습) + 진짜 저화질 평가(`real_lowq`) + NAFNet/Real-ESRGAN 복원 파이프라인 | ✅ 완료 |
+| **6차** | CCTV 다중 클래스(사람/차량/소지품) 파일럿 — 다른 도메인에서 5차 결론 재검증 | ✅ 완료 |
 
 5차는 지도 조교님의 연구방법 3.1~3.3 스펙을 반영해 1~4차의 핵심 가정 하나를
 재검증한 결과다 — 무엇이 왜 바뀌었는지는
 [docs/04_yolo26_pipeline.md](docs/04_yolo26_pipeline.md) §4.0에 표로 정리했다.
+6차는 bear라는 단일 희소 클래스를 넘어 흔한 다중 클래스·다른 도메인(CCTV)에서
+같은 실험 구조가 재현되는지 본 파일럿이다 — [docs/05_cctv_pipeline.md](docs/05_cctv_pipeline.md).
 
 제출물(7/2 공지 기준)
 1. 희소 객체 데이터셋 zip → `submission/bear_synth_dataset.zip`
@@ -58,8 +68,9 @@
 │  ├─ 01_class_distribution_analysis.md   분포 분석 · 클래스 선정 근거
 │  ├─ 02_generation_pipeline.md            생성 파이프라인 · 사용 모델 · 파라미터
 │  ├─ 03_results.md                        1~4차 결과 (YOLOv8n, real_val_lq 기준)
-│  └─ 04_yolo26_pipeline.md                5차: YOLO26·진짜 저화질 평가·복원 파이프라인
-├─ reports/                            전수 집계표, 선정/평가 결과, figure 13종
+│  ├─ 04_yolo26_pipeline.md                5차: YOLO26·진짜 저화질 평가·복원 파이프라인
+│  └─ 05_cctv_pipeline.md                  6차: CCTV 다중 클래스 파일럿·재검증
+├─ reports/                            전수 집계표, 선정/평가 결과, figure 16종
 ├─ scripts/
 │  ├─ 00_download_coco.py             어노테이션 다운로드 + SHA-256 검증
 │  ├─ 01_analyze_coco_distribution.py 전수 집계 → 희소 클래스 선정
@@ -77,7 +88,11 @@
 │  ├─ 13_compose_dataset_v2.py        5차: clean+Albumentations열화 쌍 데이터셋
 │  ├─ 14_train_eval_yolo26.py         5차: YOLO26 학습 + 평가
 │  ├─ 15_restore_real_lowq.py         real_lowq에 복원 전처리 적용
-│  └─ 16_eval_restored_only.py        복원본 재평가 (재학습 없이)
+│  ├─ 16_eval_restored_only.py        복원본 재평가 (재학습 없이)
+│  ├─ 20_build_cctv_dataset.py        6차: CCTV 8클래스 clean+deg 데이터셋
+│  ├─ 21_build_cctv_real_lowq.py      6차: 진짜 저화질 실사진 평가셋
+│  ├─ 22_train_eval_cctv.py           6차: YOLO26 학습 + 평가
+│  └─ 23_restore_cctv_lowq.py         6차: 복원 전처리 적용
 ├─ src/rareobj/                       공용 모듈 (경로, 열화, 합성, 복원, 생성모델 로더, figure 스타일)
 │  └─ vendor/                         NAFNet/RRDBNet 아키텍처 벤더링 (basicsr 미설치)
 ├─ submission/                        패키징된 제출 zip (.gitignore 대상)
@@ -110,6 +125,12 @@ python scripts/13_compose_dataset_v2.py
 python scripts/14_train_eval_yolo26.py
 python scripts/15_restore_real_lowq.py
 python scripts/16_eval_restored_only.py
+
+# 6차 — CCTV 다중 클래스 파일럿 (다른 도메인에서 5차 결론 재검증)
+python scripts/20_build_cctv_dataset.py
+python scripts/21_build_cctv_real_lowq.py
+python scripts/23_restore_cctv_lowq.py
+python scripts/22_train_eval_cctv.py
 ```
 
 검증된 실행 환경: Windows 11 / Python 3.11.5 / torch 2.8.0+cu126 /

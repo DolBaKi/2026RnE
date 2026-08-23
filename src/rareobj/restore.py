@@ -62,6 +62,8 @@ class Restorer:
         self.nafnet = load_nafnet(nafnet_ckpt, device)
         self.esrgan = load_esrgan(esrgan_ckpt, device)
 
+    @torch.no_grad()
+    def restore(self, bgr: np.ndarray) -> np.ndarray:
         """실제로 겪은 두 가지 불안정 사례와 각각의 처리.
 
         (1) 균일한 밝은 영역이 넓은 사진에서 NAFNet 출력이 [0,1]을 크게 벗어나
