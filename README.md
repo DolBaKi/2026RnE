@@ -41,6 +41,15 @@
 > 위험이 적고, 이미 강한 지식(흔한 클래스의 실사진 인식)을 소량의 순수
 > 합성 데이터로 덮어쓰면 오히려 크게 해롭다** —
 > [docs/06_cctv_generative.md](docs/06_cctv_generative.md) §6.5.
+>
+> **8차 — 주제를 "저화질 CCTV 인파 속 특정인 찾기(얼굴인식)"로 전환했다.** LFW+VGGFace2를
+> 사람별 클래스로 통합하고, SDXL-Turbo 인파 장면에 **IP-Adapter FaceID 신원 조건부
+> 인페인팅으로 특정 인물을 AI가 직접 그려 넣어** 10명 데이터셋을 만들었다. 실사진에 이
+> AI 인파 데이터와 배경 군중 하드 네거티브를 섞어 파인튜닝하자 인파 속 찾기가
+> 0.233 → 0.537(2.3배, 오인율 1% 기준)로 올랐고, 원래부터 저화질인 실사진도
+> 0.767 → 0.932로 개선됐다. **AI 인파만으로 학습하면 실사진 인식이 무너져(0.97 → 0.46)
+> 7차 결론이 재현됐다** — 합성은 실사진에 섞을 때만 쓸모가 있다 —
+> [docs/07_face_crowd.md](docs/07_face_crowd.md).
 
 ---
 
@@ -55,6 +64,7 @@
 | **5차** | 방법론 개정(YOLO26·Albumentations·clean+deg 학습) + 진짜 저화질 평가(`real_lowq`) + NAFNet/Real-ESRGAN 복원 파이프라인 | ✅ 완료 |
 | **6차** | CCTV 다중 클래스(사람/차량/소지품) 파일럿 (실사진+열화) — 5차 결론 재검증 | ✅ 완료 |
 | **7차** | CCTV 생성형 증강 파일럿 (bear와 동일 구조) — 순수 합성데이터의 도메인 갭 확인 | ✅ 완료 |
+| **8차** | 저화질 CCTV 인파 속 특정인 찾기 — LFW+VGGFace2 사람별 클래스, 신원 조건부 인페인팅 인파 합성, 10명 파일럿, `find_person.py` | ✅ 완료 |
 
 5차는 지도 조교님의 연구방법 3.1~3.3 스펙을 반영해 1~4차의 핵심 가정 하나를
 재검증한 결과다 — 무엇이 왜 바뀌었는지는
@@ -82,7 +92,8 @@
 │  ├─ 03_results.md                        1~4차 결과 (YOLOv8n, real_val_lq 기준)
 │  ├─ 04_yolo26_pipeline.md                5차: YOLO26·진짜 저화질 평가·복원 파이프라인
 │  ├─ 05_cctv_pipeline.md                  6차: CCTV 다중 클래스 파일럿(실사진+열화)
-│  └─ 06_cctv_generative.md                7차: CCTV 생성형 증강 파일럿·도메인 갭 확인
+│  ├─ 06_cctv_generative.md                7차: CCTV 생성형 증강 파일럿·도메인 갭 확인
+│  └─ 07_face_crowd.md                     8차: CCTV 인파 속 특정인 찾기(얼굴인식, 10명)
 ├─ reports/                            전수 집계표, 선정/평가 결과, figure 19종
 ├─ scripts/
 │  ├─ 00_download_coco.py             어노테이션 다운로드 + SHA-256 검증
@@ -109,8 +120,21 @@
 │  ├─ 24_generate_cctv_foregrounds.py 7차: SDXL-Turbo 8클래스 전경 생성
 │  ├─ 25_generate_cctv_backgrounds.py 7차: CCTV 시점 배경 생성
 │  ├─ 26_compose_cctv_synth.py        7차: 다중클래스 장면 합성(생성데이터)
-│  └─ 27_train_eval_cctv_gen.py       7차: 생성데이터로 학습 + 평가
-├─ src/rareobj/                       공용 모듈 (경로, 열화, 합성, 복원, 생성모델 로더, figure 스타일)
+│  ├─ 27_train_eval_cctv_gen.py       7차: 생성데이터로 학습 + 평가
+│  ├─ 30_build_face_dataset.py        8차: LFW+VGGFace2 → 사람별 정렬 얼굴 (6,289명)
+│  ├─ 30b_export_identity_classes.py  8차: 클래스 색인 (20장 미만 제외)
+│  ├─ 31_build_face_eval_sets.py      8차: 1:N 갤러리 + 자연 저해상도 프로브 + LFW pairs
+│  ├─ 32_generate_face_cctv_scenes.py 8차: SDXL-Turbo 인파 장면 + YOLO26-pose 정면 슬롯
+│  ├─ 33_compose_face_cctv_synth.py   8차: 신원 조건부 인페인팅 삽입 로직 (480명판)
+│  ├─ 34_train_eval_face.py           8차: 학습/평가 공용 로직 (480명판)
+│  ├─ 35_build_crowd_test_dets.py     8차: 인파 테스트 프레임 얼굴 검출·정답 매칭
+│  ├─ 40_build_face10.py              8차: 10명 타깃 선정·정렬·분할
+│  ├─ 41_compose_face10_cctv.py       8차: 10명 + 모르는 사람 AI 인파 프레임
+│  ├─ 42_mine_crowd_negatives.py      8차: 배경 군중 하드 네거티브
+│  ├─ 43_train_eval_face10.py         8차: baseline vs 파인튜닝 3종
+│  ├─ 44_report_face10.py             8차: 결과표·그림
+│  └─ find_person.py                  8차: CCTV 속 특정인 찾기 도구
+├─ src/rareobj/                       공용 모듈 (경로, 열화, 합성, 복원, 생성모델 로더, FaceID 인페인팅, figure 스타일)
 │  └─ vendor/                         NAFNet/RRDBNet 아키텍처 벤더링 (basicsr 미설치)
 ├─ submission/                        패키징된 제출 zip (.gitignore 대상)
 └─ data/                              .gitignore 대상 (재현 가능하므로 미커밋)
@@ -154,9 +178,23 @@ python scripts/24_generate_cctv_foregrounds.py
 python scripts/25_generate_cctv_backgrounds.py
 python scripts/26_compose_cctv_synth.py
 python scripts/27_train_eval_cctv_gen.py
+
+# 8차 — CCTV 인파 속 특정인 찾기 (얼굴인식, 10명) — 순서·소요시간은 docs/07 §7.8
+pip install --no-deps facenet-pytorch peft
+python scripts/30_build_face_dataset.py
+python scripts/31_build_face_eval_sets.py
+python scripts/30b_export_identity_classes.py
+python scripts/32_generate_face_cctv_scenes.py
+python scripts/40_build_face10.py
+python scripts/41_compose_face10_cctv.py
+python scripts/35_build_crowd_test_dets.py --data faces10
+python scripts/42_mine_crowd_negatives.py
+python scripts/43_train_eval_face10.py
+python scripts/44_report_face10.py
+python scripts/find_person.py --targets10 --input <cctv 이미지/폴더/동영상> --weights runs/face10/real_synth_s0.pt
 ```
 
-검증된 실행 환경: Windows 11 / Python 3.11.5 / torch 2.8.0+cu126 /
+검증된 실행 환경: Windows 11 / Python 3.11.5 / torch 2.8.0+cu126 (1~7차), 2.7.0+cu128 (8차) /
 RTX 4060 Laptop 8 GB.
 
 ## 데이터 취급 원칙
@@ -166,3 +204,5 @@ RTX 4060 Laptop 8 GB.
   스크립트로 재구성한다.
 - `real_val`(49장/71박스)은 **홀드아웃 평가 전용**이며 학습·생성에 투입하지 않는다.
 - 제출 zip 에는 생성 모델이 만든 이미지와 그 라벨만 넣는다.
+- 8차 얼굴 데이터(LFW·VGGFace2 원본, 정렬본, 실존 인물을 그려 넣은 합성 프레임, 가중치)는
+  레포에 올리지 않고 연구 목적 외로 배포하지 않는다.

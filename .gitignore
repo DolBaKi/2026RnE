@@ -37,3 +37,7 @@ venv/
 .ipynb_checkpoints/
 .pytest_cache/
 *.egg-info/
+
+# --- 8차: 실존 인물 얼굴이 들어간 그림 (원본 사진 + AI로 그려 넣은 프레임) — 배포하지 않음 ---
+reports/figures/fig21_face10_synth_samples.png
+reports/figures/fig22_face10_find_demo.png

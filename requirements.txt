@@ -44,3 +44,12 @@ torchmetrics[image]
 pandas>=2.2
 matplotlib>=3.9
 PyYAML>=6.0
+
+# --- 8차: 얼굴인식 / 신원 조건부 인페인팅 ---
+# facenet-pytorch 는 torch<2.3 을 핀하므로 반드시 --no-deps (기존 CUDA torch 보존):
+#   pip install --no-deps facenet-pytorch==2.6.0 peft==0.17.1
+# peft 는 diffusers 가 IP-Adapter FaceID LoRA 를 로드할 때 필요하다.
+# onnxruntime(ArcFace buffalo_l w600k_r50.onnx 추론, CPU 로 충분)
+onnxruntime>=1.18
+# 주의: 환경에 torch 와 ABI가 안 맞는 xformers 가 있으면 diffusers import 가 죽는다 —
+# src/rareobj/genmodels.py 가 감지 플래그를 꺼서 우회한다(패키지는 건드리지 않음).
