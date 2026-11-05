@@ -220,7 +220,7 @@ def get_window(canvas, x0, y0, n):
     return win, (slice(ay0, ay1), slice(ax0, ax1)), (slice(ay0 - y0, ay1 - y0), slice(ax0 - x0, ax1 - x0))
 
 
-def insert_person(models, canvas, slot, ident, night, rng, stats):
+def insert_person(models, canvas, slot, ident, night, rng, stats, prompt=None):
     """canvas 제자리 수정. 성공 시 (얼굴 박스, id_cos), 실패 시 None (canvas 원상태).
 
     신원 검증에 실패하면 시드를 바꿔 N_TRY 번까지 다시 그린다 — 1차 전체 실행에서
@@ -247,7 +247,7 @@ def insert_person(models, canvas, slot, ident, night, rng, stats):
     m2 = cv2.GaussianBlur(cv2.dilate(mask_n, np.ones((k, k), np.uint8)), (k * 2 + 1, k * 2 + 1), 0)
     m2 = (m2 * border_taper(n))[..., None]
     for t in range(N_TRY):
-        out = models.fi.inpaint(win, mask, idv, clip_face, PROMPT[night], NEGATIVE,
+        out = models.fi.inpaint(win, mask, idv, clip_face, prompt or PROMPT[night], NEGATIVE,
                                 seed=rng.randint(0, 2**31 - 1), steps=STEPS, shortcut_scale=SHORTCUT_SCALE)
         gen = cv2.resize(out, (n, n), interpolation=cv2.INTER_AREA)       # 프레임 해상도로
         gen, sigma = match_blur(gen, orig, inner, ring)

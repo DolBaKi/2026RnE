@@ -43,7 +43,7 @@ def agg(res, arm, m, k):
 
 def main() -> int:
     res = json.loads((paths.REPORTS / "eval_face10.json").read_text(encoding="utf-8"))
-    old_p = paths.REPORTS / "eval_face10_v1_no_crowd_neg.json"
+    old_p = paths.REPORTS / "eval_face10_v2_crowdneg.json"     # 성별 맞춤·CCTV 화면화 이전
     old = json.loads(old_p.read_text(encoding="utf-8")) if old_p.exists() else {}
 
     # --- 표
@@ -57,9 +57,10 @@ def main() -> int:
             cells.append(f"{mu:.3f}" + (f" ({min(v):.3f}–{max(v):.3f})" if len(v) > 1 else ""))
         lines.append(f"| {lab} | " + " | ".join(cells) + " |")
     if old:
-        lines += ["", "하드 네거티브(배경 군중) 추가 전 v1 — 같은 지표:", "",
+        lines += ["", "v2 (성별 맞춤·CCTV 화면 생성형 스타일화 이전, 하드 네거티브 포함) — 같은 지표.",
+                  "※ v2 와 v3 는 인파 테스트 프레임 자체가 다르다(v3 는 CCTV 화면화된 테스트) — 직접 비교 불가, 참고용:", "",
                   "| 모델 | 자연 저해상도 | AI 인파 속 찾기 | 인파 top-1 |", "|---|---|---|---|"]
-        for arm, lab in ARMS[2:]:
+        for arm, lab in ARMS:
             c = [agg(old, arm, m, k)[0] for m, k in (("test_lowres_nat", "dir@far1%"), ("crowd", "find_rate@far1%"),
                                                      ("crowd", "top1_detected"))]
             lines.append(f"| {lab} | " + " | ".join(f"{x:.3f}" for x in c) + " |")
@@ -116,11 +117,12 @@ def main() -> int:
 
     # --- fig22 find_person 시연
     demo = paths.ROOT / "runs" / "find_person"
-    pair = [demo / "demo_baseline" / "test_0018.jpg", demo / "demo_real_synth" / "test_0018.jpg"]
+    pair = [demo / "demo_baseline" / "test_0037.jpg", demo / "demo_real_synth" / "test_0037.jpg"]
     if all(p.exists() for p in pair):
         ims = [cv2.resize(cv2.imread(str(p)), (960, 640)) for p in pair]
-        for im, t in zip(ims, ["baseline", "real+synth (s0)"]):
-            cv2.putText(im, t, (16, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.1, (255, 255, 255), 3)
+        for im, t in zip(ims, ["baseline", "real+synth (s1)"]):
+            cv2.putText(im, t, (16, 600), cv2.FONT_HERSHEY_SIMPLEX, 1.1, (0, 0, 0), 6)   # OSD(좌상단 시각)와 겹치지 않게 좌하단
+            cv2.putText(im, t, (16, 600), cv2.FONT_HERSHEY_SIMPLEX, 1.1, (255, 255, 255), 2)
         cv2.imwrite(str(paths.FIGURES / "fig22_face10_find_demo.png"), np.vstack(ims))
     return 0
 

@@ -1,0 +1,12 @@
+{
+ "name": "v4b_pilot30",
+ "frames": "data/dataset/faces10/pilot_v4b/cctv_frames/train",
+ "n_pos": 79,
+ "n_neg": 154,
+ "n_frames": 25,
+ "face_px_med_pos": 43.19561767578125,
+ "face_px_med_neg": 36.778404235839844,
+ "auc_size_only": 0.6190202202860431,
+ "auc_handcrafted": 0.873664310373171,
+ "auc_cnn": 0.9527371362814401
+}

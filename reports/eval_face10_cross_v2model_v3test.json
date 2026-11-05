@@ -1,0 +1,170 @@
+{
+ "real_deg/s0": {
+  "threshold@far1%": 0.4703972041606903,
+  "unknown_lowres_far": 0.009433962264150943,
+  "test_hq": {
+   "top1": 1.0,
+   "dir@far1%": 0.997907949790795,
+   "n": 478
+  },
+  "test_lowres_nat": {
+   "top1": 0.9902439024390244,
+   "dir@far1%": 0.9512195121951219,
+   "n": 615
+  },
+  "test_hq_albudeg": {
+   "top1": 1.0,
+   "dir@far1%": 0.9874476987447699,
+   "n": 478
+  },
+  "crowd": {
+   "find_rate@far1%": 0.08241758241758242,
+   "find_rate_detected@far1%": 0.08571428571428572,
+   "top1_detected": 0.5142857142857142,
+   "threshold@far1%": 0.5342803001403809,
+   "detection_recall": 0.9615384615384616,
+   "n_gt_targets": 182,
+   "n_unknown_dets": 445
+  }
+ },
+ "real_deg/s1": {
+  "threshold@far1%": 0.49364566802978516,
+  "unknown_lowres_far": 0.01218553459119497,
+  "test_hq": {
+   "top1": 1.0,
+   "dir@far1%": 0.99581589958159,
+   "n": 478
+  },
+  "test_lowres_nat": {
+   "top1": 0.991869918699187,
+   "dir@far1%": 0.9609756097560975,
+   "n": 615
+  },
+  "test_hq_albudeg": {
+   "top1": 1.0,
+   "dir@far1%": 0.9916317991631799,
+   "n": 478
+  },
+  "crowd": {
+   "find_rate@far1%": 0.14835164835164835,
+   "find_rate_detected@far1%": 0.15428571428571428,
+   "top1_detected": 0.5028571428571429,
+   "threshold@far1%": 0.4729103147983551,
+   "detection_recall": 0.9615384615384616,
+   "n_gt_targets": 182,
+   "n_unknown_dets": 445
+  }
+ },
+ "real+synth/s0": {
+  "threshold@far1%": 0.565976083278656,
+  "unknown_lowres_far": 0.012971698113207548,
+  "test_hq": {
+   "top1": 1.0,
+   "dir@far1%": 0.99581589958159,
+   "n": 478
+  },
+  "test_lowres_nat": {
+   "top1": 0.9902439024390244,
+   "dir@far1%": 0.9349593495934959,
+   "n": 615
+  },
+  "test_hq_albudeg": {
+   "top1": 0.99581589958159,
+   "dir@far1%": 0.9372384937238494,
+   "n": 478
+  },
+  "crowd": {
+   "find_rate@far1%": 0.35714285714285715,
+   "find_rate_detected@far1%": 0.37142857142857144,
+   "top1_detected": 0.7085714285714285,
+   "threshold@far1%": 0.4818299114704132,
+   "detection_recall": 0.9615384615384616,
+   "n_gt_targets": 182,
+   "n_unknown_dets": 445
+  }
+ },
+ "real+synth/s1": {
+  "threshold@far1%": 0.5598592162132263,
+  "unknown_lowres_far": 0.0110062893081761,
+  "test_hq": {
+   "top1": 0.997907949790795,
+   "dir@far1%": 0.9895397489539749,
+   "n": 478
+  },
+  "test_lowres_nat": {
+   "top1": 0.9902439024390244,
+   "dir@far1%": 0.9284552845528455,
+   "n": 615
+  },
+  "test_hq_albudeg": {
+   "top1": 0.9937238493723849,
+   "dir@far1%": 0.9309623430962343,
+   "n": 478
+  },
+  "crowd": {
+   "find_rate@far1%": 0.3626373626373626,
+   "find_rate_detected@far1%": 0.37714285714285717,
+   "top1_detected": 0.6914285714285714,
+   "threshold@far1%": 0.43395310640335083,
+   "detection_recall": 0.9615384615384616,
+   "n_gt_targets": 182,
+   "n_unknown_dets": 445
+  }
+ },
+ "synth_cctv/s0": {
+  "threshold@far1%": 0.8937712907791138,
+  "unknown_lowres_far": 0.006289308176100629,
+  "test_hq": {
+   "top1": 0.9142259414225942,
+   "dir@far1%": 0.26569037656903766,
+   "n": 478
+  },
+  "test_lowres_nat": {
+   "top1": 0.7040650406504065,
+   "dir@far1%": 0.15121951219512195,
+   "n": 615
+  },
+  "test_hq_albudeg": {
+   "top1": 0.7405857740585774,
+   "dir@far1%": 0.18410041841004185,
+   "n": 478
+  },
+  "crowd": {
+   "find_rate@far1%": 0.027472527472527472,
+   "find_rate_detected@far1%": 0.02857142857142857,
+   "top1_detected": 0.4685714285714286,
+   "threshold@far1%": 0.8594871163368225,
+   "detection_recall": 0.9615384615384616,
+   "n_gt_targets": 182,
+   "n_unknown_dets": 445
+  }
+ },
+ "synth_cctv/s1": {
+  "threshold@far1%": 0.8047389388084412,
+  "unknown_lowres_far": 0.009040880503144654,
+  "test_hq": {
+   "top1": 0.9602510460251046,
+   "dir@far1%": 0.6610878661087866,
+   "n": 478
+  },
+  "test_lowres_nat": {
+   "top1": 0.7853658536585366,
+   "dir@far1%": 0.3723577235772358,
+   "n": 615
+  },
+  "test_hq_albudeg": {
+   "top1": 0.8682008368200836,
+   "dir@far1%": 0.4790794979079498,
+   "n": 478
+  },
+  "crowd": {
+   "find_rate@far1%": 0.07142857142857142,
+   "find_rate_detected@far1%": 0.07428571428571429,
+   "top1_detected": 0.5142857142857142,
+   "threshold@far1%": 0.7841264009475708,
+   "detection_recall": 0.9615384615384616,
+   "n_gt_targets": 182,
+   "n_unknown_dets": 445
+  }
+ }
+}

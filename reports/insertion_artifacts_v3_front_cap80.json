@@ -1,0 +1,12 @@
+{
+ "name": "v3_front_cap80",
+ "frames": "data/dataset/faces10/cctv_frames/train",
+ "n_pos": 81,
+ "n_neg": 47,
+ "n_frames": 48,
+ "face_px_med_pos": 40.1337890625,
+ "face_px_med_neg": 41.645172119140625,
+ "auc_size_only": 0.35855003940110325,
+ "auc_handcrafted": 0.8599947465195692,
+ "auc_cnn": 0.9290780141843972
+}
